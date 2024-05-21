@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 
 namespace YouZip;
 
@@ -35,6 +36,36 @@ public static class Extensions
                     }),
             NumberStyles.HexNumber
         );
+    }
+
+    public static uint ToUInt(this byte[] input, bool littleEndian = true)
+    {
+        if (littleEndian)
+            return uint.Parse(
+                input
+                    .Reverse()
+                    .Aggregate(
+                        "", (acc, curr) =>
+                        {
+                            var currentValue = Convert.ToString(curr, 16);
+                            if (currentValue.Length == 2)
+                                return acc + currentValue;
+                            else
+                                return acc + "0" + currentValue;
+                        }),
+                NumberStyles.HexNumber);
+        else
+            return uint.Parse(
+                input
+                    .Aggregate(
+                        "", (acc, curr) =>
+                        {
+                            var currentValue = Convert.ToString(curr, 16);
+                            if (currentValue.Length == 2)
+                                return acc + currentValue;
+                            return acc + "0" + currentValue;
+                        }), 
+                NumberStyles.HexNumber);
     }
 
     public static string FormatString(this byte[] input, int bytesPerLine = 8)

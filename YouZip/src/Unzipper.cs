@@ -41,7 +41,7 @@ public class Unzipper(ILogger<Unzipper> logger)
     {
         List<LocalFileHeader> result = [];
         
-        for (var i = 0; i < input.Length - LocalFileHeader.LocalFileHeaderSignatureLength; i++)
+        for (var i = 0; i < input.Length - LocalFileHeader.LocalFileHeaderSignatureLength; )
         {
             if (input
                 .Skip(i)
@@ -98,8 +98,12 @@ public class Unzipper(ILogger<Unzipper> logger)
                 // Console.WriteLine(extraField.FormatString());
                 
                 // Set i to last position in current header
-                i += extraFieldLength.ToUShortLittleEndian() - 1;
+                i += extraFieldLength.ToUShortLittleEndian();
 
+                // Try reading the data as well
+                var fileData = input.Skip(i).Take((int)compressedSize.ToUInt()).ToArray();
+                i += (int)compressedSize.ToUInt();
+                
                 var test =
                     versionNeededToExtract
                         .Concat(generalPurposeBitFlag)
@@ -113,12 +117,17 @@ public class Unzipper(ILogger<Unzipper> logger)
                         .Concat(extraFieldLength)
                         .Concat(fileName)
                         .Concat(extraField)
+                        .Concat(fileData)
                         .ToArray();
                 
                 Console.WriteLine(test.FormatString());
                 
                 Console.WriteLine($"'i' is: {i}");
-            } 
+            }
+            else
+            {
+                i++;
+            }
         }
 
         return result;
