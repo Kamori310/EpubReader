@@ -15,19 +15,22 @@ public struct LocalFileHeader
     public const int UncompressedSizeLength = 4;
     public const int FileNameLengthLength = 2;
     public const int ExtraFieldLengthLength = 2;
-    
-    public byte[] VersionNeededToExtract { get; set; }
-    public byte[] GeneralPurposeBitFlag { get; set; }
-    public byte[] CompressionMethod { get; set; }
-    public byte[] LastModFileTime { get; set; }
-    public byte[] LastModFileDate { get; set; }
-    public byte[] Crc32 { get; set; }
-    public byte[] CompressedSize { get; set; }
-    public byte[] UncompressedSize { get; set; }
-    public byte[] FileNameLength { get; set; }
-    public byte[] ExtraFieldLength { get; set; }
-    public byte[] FileName { get; set; }
-    public byte[] ExtraField { get; set; }
+
+    public byte[] VersionNeededToExtract;
+    public byte[] GeneralPurposeBitFlag;
+    public byte[] CompressionMethod;
+    public byte[] LastModFileTime;
+    public byte[] LastModFileDate;
+    public byte[] Crc32;
+    /// <summary>
+    /// Includes the size of the optional data descriptor 
+    /// </summary>
+    public byte[] CompressedSize;
+    public byte[] UncompressedSize;
+    public byte[] FileNameLength;
+    public byte[] ExtraFieldLength;
+    public byte[] FileName;
+    public byte[] ExtraField;
 
     public LocalFileHeader(
         byte[] versionNeededToExtract,
@@ -45,7 +48,6 @@ public struct LocalFileHeader
     {
         // NOTE: Investigate whether this length check is necessary
         // Should consider other exception type
-        
         if (versionNeededToExtract.Length != VersionNeedToExtractLength)
             throw new ArgumentException($"{nameof(versionNeededToExtract)} is out of bounds.");
         if (generalPurposeBitFlag.Length != GeneralPurposeBitFlagLength)
@@ -66,9 +68,9 @@ public struct LocalFileHeader
             throw new ArgumentException($"{nameof(fileNameLength)} is out of bounds.");
         if (extraFieldLength.Length != ExtraFieldLengthLength)
             throw new ArgumentException($"{nameof(extraFieldLength)} is out of bounds.");
-        if (fileName.Length != fileNameLength.ToUShortBigEndian())
+        if (fileName.Length != fileNameLength.ToUShort())
             throw new ArgumentException($"{nameof(fileName)} is out of bounds.");
-        if (extraField.Length != extraFieldLength.ToUShortBigEndian())
+        if (extraField.Length != extraFieldLength.ToUShort())
             throw new ArgumentException($"{nameof(extraField)} is out of bounds.");
         
         VersionNeededToExtract = versionNeededToExtract;

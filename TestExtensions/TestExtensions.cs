@@ -10,14 +10,14 @@ public class TestExtensions
     }
 
 
-    public class Test_Byte_Array_Extensions
+    public class TestByteArrayExtensions
     {
         [Test]
         public void Byte_Array_To_UShort_Big_Endian()
         {
             byte[] valueToBeConverted = [0x0f, 0xac];
             const ushort expectedValue = 4012;
-            Assert.That(valueToBeConverted.ToUShortBigEndian(), Is.EqualTo(expectedValue));
+            Assert.That(valueToBeConverted.ToUShort(false), Is.EqualTo(expectedValue));
         }
 
         [Test]
@@ -25,7 +25,7 @@ public class TestExtensions
         {
             byte[] valueToBeConverted = [0xff, 0xff];
             const ushort expectedValue = 65535;
-            Assert.That(valueToBeConverted.ToUShortBigEndian(), Is.EqualTo(expectedValue));
+            Assert.That(valueToBeConverted.ToUShort(false), Is.EqualTo(expectedValue));
         }
 
         [Test]
@@ -33,7 +33,7 @@ public class TestExtensions
         {
             byte[] valueToBeConverted = [0x00, 0x00];
             const ushort expectedValue = 0;
-            Assert.That(valueToBeConverted.ToUShortBigEndian(), Is.EqualTo(expectedValue));
+            Assert.That(valueToBeConverted.ToUShort(false), Is.EqualTo(expectedValue));
         }
         
         [Test]
@@ -41,7 +41,7 @@ public class TestExtensions
         {
             byte[] valueToBeConverted = [0xac, 0x0f];
             const ushort expectedValue = 4012;
-            Assert.That(valueToBeConverted.ToUShortLittleEndian(), Is.EqualTo(expectedValue));
+            Assert.That(valueToBeConverted.ToUShort(), Is.EqualTo(expectedValue));
         }
 
         [Test]
@@ -49,7 +49,7 @@ public class TestExtensions
         {
             byte[] valueToBeConverted = [0xff, 0xff];
             const ushort expectedValue = 65535;
-            Assert.That(valueToBeConverted.ToUShortLittleEndian(), Is.EqualTo(expectedValue));
+            Assert.That(valueToBeConverted.ToUShort(), Is.EqualTo(expectedValue));
         }
 
         [Test]
@@ -57,7 +57,7 @@ public class TestExtensions
         {
             byte[] valueToBeConverted = [0x00, 0x00];
             const ushort expectedValue = 0;
-            Assert.That(valueToBeConverted.ToUShortLittleEndian(), Is.EqualTo(expectedValue));
+            Assert.That(valueToBeConverted.ToUShort(), Is.EqualTo(expectedValue));
         }
 
         [Test]

@@ -1,47 +1,46 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace YouZip;
 
 public static class Extensions
 {
-    public static ushort ToUShortBigEndian(this byte[] input)
+    public static ushort ToUShort(this byte[] input, bool littleEndian = true)
     {
-        return UInt16.Parse(
-            input.Aggregate(
-                "", (acc, curr) =>
-                {
-                    var currentValue = Convert.ToString(curr, 16);
-                    if (currentValue.Length == 2)
-                        return acc + currentValue;
-                    else
-                        return acc + "0" + currentValue;
-                }), 
-            NumberStyles.HexNumber);
-    }
-    
-    public static ushort ToUShortLittleEndian(this byte[] input)
-    {
-        return UInt16.Parse(
-            input
-                .Reverse()
-                .Aggregate(
-                    "", (acc, curr) =>
-                    {
-                        var currentValue = Convert.ToString(curr, 16);
-                        if (currentValue.Length == 2)
-                            return acc + currentValue;
-                        else
-                            return acc + "0" + currentValue;
-                    }),
-            NumberStyles.HexNumber
-        );
+        if (littleEndian)
+            return UInt16.Parse(
+                input
+                    .Reverse()
+                    .Aggregate(
+                        "", (acc, curr) =>
+                        {
+                            var currentValue = Convert.ToString(curr, 16);
+                            if (currentValue.Length == 2)
+                                return acc + currentValue;
+                            else
+                                return acc + "0" + currentValue;
+                        }),
+                NumberStyles.HexNumber
+            );
+        else
+            return UInt16.Parse(
+                input
+                    .Aggregate(
+                        "", (acc, curr) =>
+                        {
+                            var currentValue = Convert.ToString(curr, 16);
+                            if (currentValue.Length == 2)
+                                return acc + currentValue;
+                            else
+                                return acc + "0" + currentValue;
+                        }),
+                NumberStyles.HexNumber
+            );
     }
 
     public static uint ToUInt(this byte[] input, bool littleEndian = true)
     {
         if (littleEndian)
-            return uint.Parse(
+            return UInt32.Parse(
                 input
                     .Reverse()
                     .Aggregate(
@@ -55,7 +54,7 @@ public static class Extensions
                         }),
                 NumberStyles.HexNumber);
         else
-            return uint.Parse(
+            return UInt32.Parse(
                 input
                     .Aggregate(
                         "", (acc, curr) =>

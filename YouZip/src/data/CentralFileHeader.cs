@@ -2,9 +2,9 @@
 
 public struct CentralFileHeader
 {
-    public readonly byte[] CentralFileHeaderSignature = [0x50, 0x4b, 0x01, 0x02];
+    public static readonly byte[] CentralFileHeaderSignature = [0x50, 0x4b, 0x01, 0x02];
     
-    public const int CentralFilHeaderSignatureLength = 4;
+    public const int CentralFileHeaderSignatureLength = 4;
     public const int VersionMadeByLength = 2;
     public const int VersionNeededToExtractLength = 2;
     public const int GeneralPurposeBitFlagLength = 2;
