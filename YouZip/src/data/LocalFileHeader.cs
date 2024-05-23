@@ -1,6 +1,6 @@
 ﻿namespace YouZip.data;
 
-public struct LocalFileHeader
+public class LocalFileHeader
 {
     public static readonly byte[] LocalFileHeaderSignature = [0x50, 0x4b, 0x03, 0x04];
     
@@ -85,5 +85,23 @@ public struct LocalFileHeader
         ExtraFieldLength = extraFieldLength;
         FileName = fileName;
         ExtraField = extraField;
+    }
+
+    public int GetHeaderLength()
+    {
+        return
+            LocalFileHeaderSignatureLength +
+            VersionNeedToExtractLength +
+            GeneralPurposeBitFlagLength +
+            CompressionMethodLength +
+            LastModFileTimeLength +
+            LastModFileDateLength +
+            Crc32Length +
+            CompressedSizeLength +
+            UncompressedSizeLength +
+            FileNameLengthLength +
+            ExtraFieldLengthLength +
+            FileNameLength.ToUShort() +
+            ExtraFieldLength.ToUShort();
     }
 }

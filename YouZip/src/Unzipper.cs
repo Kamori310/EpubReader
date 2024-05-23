@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Xml;
 using Microsoft.Extensions.Logging;
 using YouZip.data;
 
@@ -147,85 +146,187 @@ public class Unzipper(ILogger<Unzipper> logger)
         return result;
     }
 
+    private LocalFileEntry GetLocalFileEntry(byte[] input, int startingPosition)
+    {
+        var header = GetLocalFileHeader(input, startingPosition);
+        var fileData = GetPropertyFromBytes(
+            input,
+            startingPosition + header.GetHeaderLength(),
+            (int)header.CompressedSize.ToUInt());
+
+        return new LocalFileEntry(header, fileData);
+    }
+
+    private LocalFileHeader GetLocalFileHeader(byte[] input, int startingPosition)
+    {
+        startingPosition += LocalFileHeader.LocalFileHeaderSignatureLength;
+
+        var versionNeededToExtract = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.VersionNeedToExtractLength);
+        startingPosition += LocalFileHeader.VersionNeedToExtractLength;
+
+        var generalPurposeBitFlag = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.GeneralPurposeBitFlagLength);
+        startingPosition += LocalFileHeader.GeneralPurposeBitFlagLength;
+
+        var compressionMethod = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.CompressionMethodLength);
+        startingPosition += LocalFileHeader.CompressionMethodLength;
+
+        var lastModFileTime = GetPropertyFromBytes(
+            input,
+            startingPosition,
+            LocalFileHeader.LastModFileTimeLength);
+        startingPosition += LocalFileHeader.LastModFileTimeLength;
+
+        var lastModFileDate = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.LastModFileDateLength);
+        startingPosition += LocalFileHeader.LastModFileDateLength;
+
+        var crc32 = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.Crc32Length);
+        startingPosition += LocalFileHeader.Crc32Length;
+
+        var compressedSize = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.CompressedSizeLength);
+        startingPosition += LocalFileHeader.CompressedSizeLength;
+
+        var uncompressedSize = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.UncompressedSizeLength);
+        startingPosition += LocalFileHeader.UncompressedSizeLength;
+
+        var fileNameLength = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.FileNameLengthLength);
+        startingPosition += LocalFileHeader.FileNameLengthLength;
+        Console.WriteLine($"File name length: {fileNameLength.ToUShort()}");
+
+        var extraFieldLength = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            LocalFileHeader.ExtraFieldLengthLength);
+        startingPosition += LocalFileHeader.ExtraFieldLengthLength;
+        Console.WriteLine($"Extra field length: {extraFieldLength.ToUShort()}");
+
+        var fileName = GetPropertyFromBytes(
+            input, 
+            startingPosition, 
+            fileNameLength.ToUShort());
+        startingPosition += fileNameLength.ToUShort();
+        Console.WriteLine($"{Encoding.UTF8.GetString(fileName)}");
+
+        var extraField = GetPropertyFromBytes(
+            input, startingPosition, extraFieldLength.ToUShort());
+
+        return new LocalFileHeader(
+            versionNeededToExtract,
+            generalPurposeBitFlag,
+            compressionMethod, 
+            lastModFileTime, 
+            lastModFileDate, 
+            crc32, 
+            compressedSize, 
+            uncompressedSize, 
+            fileNameLength, 
+            extraFieldLength, 
+            fileName, 
+            extraField
+        );
+    }
+
     private CentralFileHeader GetCentralFileHeader(byte[] input, int startingPosition)
     {
         startingPosition += CentralFileHeader.CentralFileHeaderSignatureLength;
 
-        var versionMadeBy = GetProperty(
+        var versionMadeBy = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.VersionMadeByLength);
         startingPosition += CentralFileHeader.VersionMadeByLength;
 
-        var versionNeededToExtract = GetProperty(
+        var versionNeededToExtract = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.VersionNeededToExtractLength);
         startingPosition += CentralFileHeader.VersionNeededToExtractLength;
 
-        var generalPurposeBitFlag = GetProperty(
+        var generalPurposeBitFlag = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.GeneralPurposeBitFlagLength);
         startingPosition += CentralFileHeader.GeneralPurposeBitFlagLength;
 
-        var compressionMethod = GetProperty(
+        var compressionMethod = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.CompressionMethodLength);
         startingPosition += CentralFileHeader.CompressionMethodLength;
 
-        var lastModFileTime = GetProperty(
+        var lastModFileTime = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.LastModFileTimeLength);
         startingPosition += CentralFileHeader.LastModFileTimeLength;
 
-        var lastModFileDate = GetProperty(
+        var lastModFileDate = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.LastModFileDateLength);
         startingPosition += CentralFileHeader.LastModFileDateLength;
 
-        var crc32 = GetProperty(
+        var crc32 = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.Crc32Length);
         startingPosition += CentralFileHeader.Crc32Length;
 
-        var compressedSize = GetProperty(
+        var compressedSize = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.CompressedSizeLength);
         startingPosition += CentralFileHeader.CompressedSizeLength;
         
-        var uncompressedSize = GetProperty(
+        var uncompressedSize = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.UncompressedSizeLength);
         startingPosition += CentralFileHeader.UncompressedSizeLength;
 
-        var fileNameLength = GetProperty(
+        var fileNameLength = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.FileNameLengthLength);
         startingPosition += CentralFileHeader.FileNameLengthLength;
 
-        var extraFieldLength = GetProperty(
+        var extraFieldLength = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.ExtraFieldLengthLength);
         startingPosition += CentralFileHeader.ExtraFieldLengthLength;
 
-        var fileCommentLength = GetProperty(
+        var fileCommentLength = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.FileCommentLengthLength);
         startingPosition += CentralFileHeader.FileCommentLengthLength;
 
-        var diskNumberStart = GetProperty(
+        var diskNumberStart = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.DiskNumberStartLength);
         startingPosition += CentralFileHeader.DiskNumberStartLength;
 
-        var internalFileAttributes = GetProperty(
+        var internalFileAttributes = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.InternalFileAttributesLength);
         startingPosition += CentralFileHeader.InternalFileAttributesLength;
 
-        var externalFileAttribute = GetProperty(
+        var externalFileAttribute = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.ExternalFileAttributesLength);
         startingPosition += CentralFileHeader.ExternalFileAttributesLength;
 
-        var relativeOffsetOfLocalHeader = GetProperty(
+        var relativeOffsetOfLocalHeader = GetPropertyFromBytes(
             input, startingPosition, CentralFileHeader.RelativeOffsetOfLocalHeaderLength);
         startingPosition += CentralFileHeader.RelativeOffsetOfLocalHeaderLength;
 
-        var fileName = GetProperty(
+        var fileName = GetPropertyFromBytes(
             input, startingPosition, fileNameLength.ToUShort());
         startingPosition += fileNameLength.ToUShort();
 
-        var extraField = GetProperty(
+        var extraField = GetPropertyFromBytes(
             input, startingPosition, extraFieldLength.ToUShort());
         startingPosition += extraFieldLength.ToUShort();
 
-        var fileComment = GetProperty(
+        var fileComment = GetPropertyFromBytes(
             input, startingPosition, fileCommentLength.ToUShort());
-        startingPosition += fileCommentLength.ToUShort();
 
         return new CentralFileHeader(
             versionMadeBy,
@@ -249,7 +350,7 @@ public class Unzipper(ILogger<Unzipper> logger)
             fileComment);
     }
 
-    private static byte[] GetProperty(
+    private static byte[] GetPropertyFromBytes(
         byte[] input, 
         int startingPosition, 
         int propertyLength)
