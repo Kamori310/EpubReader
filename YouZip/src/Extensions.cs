@@ -82,4 +82,15 @@ public static class Extensions
             .Select(it => String.Join(" ", it))
             .Aggregate("", (acc, curr) => acc + curr + "\n");
     }
+
+    public static byte[] Subarray(
+        this byte[] input, 
+        int startPosition, 
+        int subarrayLength)
+    {
+        return input
+            .Skip(startPosition)
+            .Take(subarrayLength)
+            .ToArray();
+    }
 }

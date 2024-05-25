@@ -1,4 +1,6 @@
-﻿namespace YouZip.data;
+﻿using System.Text;
+
+namespace YouZip.data;
 
 public class LocalFileHeader
 {
@@ -31,7 +33,68 @@ public class LocalFileHeader
     public byte[] ExtraFieldLength;
     public byte[] FileName;
     public byte[] ExtraField;
+    
+    public LocalFileHeader (byte[] input, int startingPosition)
+    {
+        startingPosition += LocalFileHeaderSignatureLength;
 
+        VersionNeededToExtract = input.Subarray(startingPosition, VersionNeedToExtractLength);
+        startingPosition += VersionNeedToExtractLength;
+        
+        GeneralPurposeBitFlag = input.Subarray(startingPosition, GeneralPurposeBitFlagLength);
+        startingPosition += GeneralPurposeBitFlagLength;
+
+        CompressionMethod = input.Subarray(startingPosition, CompressionMethodLength);
+        startingPosition += CompressionMethodLength;
+
+        LastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);
+        startingPosition += LastModFileTimeLength;
+
+        LastModFileDate = input.Subarray(startingPosition, LastModFileDateLength);
+        startingPosition += LastModFileDateLength;
+
+        Crc32 = input.Subarray(startingPosition, Crc32Length);
+        startingPosition += Crc32Length;
+
+        CompressedSize = input.Subarray(startingPosition, CompressedSizeLength);
+        startingPosition += CompressedSizeLength;
+
+        UncompressedSize = input.Subarray(startingPosition, UncompressedSizeLength);
+        startingPosition += UncompressedSizeLength;
+
+        FileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
+        startingPosition += FileNameLengthLength;
+        Console.WriteLine($"File name length: {FileNameLength.ToUShort()}");
+
+        ExtraFieldLength = input.Subarray(startingPosition, ExtraFieldLengthLength);
+        startingPosition += ExtraFieldLengthLength;
+        Console.WriteLine($"Extra field length: {ExtraFieldLength.ToUShort()}");
+
+        FileName = input.Subarray(startingPosition, FileNameLength.ToUShort());
+        startingPosition += FileNameLength.ToUShort();
+        Console.WriteLine($"{Encoding.UTF8.GetString(FileName)}");
+
+        ExtraField = input.Subarray(startingPosition, ExtraFieldLength.ToUShort());
+    }
+
+    public int HeaderLength()
+    {
+        return
+            LocalFileHeaderSignatureLength +
+            VersionNeedToExtractLength +
+            GeneralPurposeBitFlagLength +
+            CompressionMethodLength +
+            LastModFileTimeLength +
+            LastModFileDateLength +
+            Crc32Length +
+            CompressedSizeLength +
+            UncompressedSizeLength +
+            FileNameLengthLength +
+            ExtraFieldLengthLength +
+            FileNameLength.ToUShort() +
+            ExtraFieldLength.ToUShort();
+    }
+    
     public LocalFileHeader(
         byte[] versionNeededToExtract,
         byte[] generalPurposeBitFlag,
@@ -85,23 +148,5 @@ public class LocalFileHeader
         ExtraFieldLength = extraFieldLength;
         FileName = fileName;
         ExtraField = extraField;
-    }
-
-    public int GetHeaderLength()
-    {
-        return
-            LocalFileHeaderSignatureLength +
-            VersionNeedToExtractLength +
-            GeneralPurposeBitFlagLength +
-            CompressionMethodLength +
-            LastModFileTimeLength +
-            LastModFileDateLength +
-            Crc32Length +
-            CompressedSizeLength +
-            UncompressedSizeLength +
-            FileNameLengthLength +
-            ExtraFieldLengthLength +
-            FileNameLength.ToUShort() +
-            ExtraFieldLength.ToUShort();
     }
 }
