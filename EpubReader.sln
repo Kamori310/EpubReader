@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouZip", "YouZip\YouZip.csproj", "{4522EF5C-FD5A-4C2B-9A06-7DBF0CAB7546}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExtensions", "TestExtensions\TestExtensions.csproj", "{856F1F52-A55C-4BD4-BC64-F3A3DBF35A85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestYouZip", "TestYouZip\TestYouZip.csproj", "{856F1F52-A55C-4BD4-BC64-F3A3DBF35A85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

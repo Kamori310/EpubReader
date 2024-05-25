@@ -18,6 +18,9 @@ public class LocalFileHeader
     public const int FileNameLengthLength = 2;
     public const int ExtraFieldLengthLength = 2;
 
+    /// <summary>
+    /// Saved in ushort format
+    /// </summary>
     public byte[] VersionNeededToExtract;
     public byte[] GeneralPurposeBitFlag;
     public byte[] CompressionMethod;
@@ -64,15 +67,15 @@ public class LocalFileHeader
 
         FileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
         startingPosition += FileNameLengthLength;
-        Console.WriteLine($"File name length: {FileNameLength.ToUShort()}");
+        // Console.WriteLine($"File name length: {FileNameLength.ToUShort()}");
 
         ExtraFieldLength = input.Subarray(startingPosition, ExtraFieldLengthLength);
         startingPosition += ExtraFieldLengthLength;
-        Console.WriteLine($"Extra field length: {ExtraFieldLength.ToUShort()}");
+        // Console.WriteLine($"Extra field length: {ExtraFieldLength.ToUShort()}");
 
         FileName = input.Subarray(startingPosition, FileNameLength.ToUShort());
         startingPosition += FileNameLength.ToUShort();
-        Console.WriteLine($"{Encoding.UTF8.GetString(FileName)}");
+        // Console.WriteLine($"{Encoding.UTF8.GetString(FileName)}");
 
         ExtraField = input.Subarray(startingPosition, ExtraFieldLength.ToUShort());
     }
@@ -93,5 +96,34 @@ public class LocalFileHeader
             ExtraFieldLengthLength +
             FileNameLength.ToUShort() +
             ExtraFieldLength.ToUShort();
+    }
+
+    public ushort GetVersionNeededToExtract()
+    {
+        return VersionNeededToExtract.ToUShort();
+    }
+
+    public bool[] GetGeneralPurposeBitFlags()
+    {
+        //     int 32768 16394  8192  4096  2048  1024   512   256
+        // byte[0]     0     1     2     3     4     5     6     7
+
+        int[] bits = 
+            [
+                7, // 0b1000_0000 
+                6, // 0b0100_0000
+                5, // 0b0010_0000
+                4, // 0b0001_0000
+                3, // 0b0000_1000
+                2, // 0b0000_0100
+                1, // 0b0000_0010
+                0  // 0b0000_0001
+            ];
+        // Todo still wrong
+        return GeneralPurposeBitFlag
+            .SelectMany(it =>
+                bits.Select(bit =>
+                    it.GetBit(bit)))
+            .ToArray();
     }
 }

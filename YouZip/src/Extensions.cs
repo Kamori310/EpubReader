@@ -83,6 +83,25 @@ public static class Extensions
             .Aggregate("", (acc, curr) => acc + curr + "\n");
     }
 
+    public static string FormatStringAsBits(this byte[] input)
+    {
+        return input
+            .Select(
+                it =>
+                {
+                    var asString = Convert.ToString(it, 2);
+                    if (asString.Length != 8)
+                    {
+                        return asString.PadLeft(8).Replace(' ', '0');
+                    }
+                    else
+                    {
+                        return asString;
+                    }
+                })
+            .Aggregate("", (acc, curr) => acc + curr + "\n");
+    }
+
     public static byte[] Subarray(
         this byte[] input, 
         int startPosition, 
@@ -93,4 +112,18 @@ public static class Extensions
             .Take(subarrayLength)
             .ToArray();
     }
+
+    public static bool GetBit(this byte input, int bitNumber)
+    {
+        if (bitNumber < 0 || bitNumber >= 8)
+        {
+            throw new ArgumentOutOfRangeException(nameof(bitNumber), "Bit number must be between 0 and 7");
+        }
+
+        byte mask = (byte)(1 << bitNumber);
+        byte result = (byte)(input & mask);
+
+        return result > 0;
+    }
+
 }

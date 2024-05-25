@@ -17,13 +17,19 @@ public class Unzipper(ILogger<Unzipper> logger)
         
         // Console.WriteLine(allBytes.FormatString());
 
-        GetLocalFileHeaders(allBytes);
+        // GetLocalFileHeaders(allBytes);
 
         Console.WriteLine("Local File Headers");
         foreach (var startingPosition in FindSignatures(
                      allBytes, LocalFileHeader.LocalFileHeaderSignature))
         {
             Console.WriteLine($"Starting position: {startingPosition}");
+            var localFileEntry = new LocalFileEntry(allBytes, startingPosition);
+            Console.WriteLine($"Version needed to extract as bytes: {localFileEntry._localFileHeader.VersionNeededToExtract.FormatString()}");
+            Console.WriteLine($"Version needed to extract as ushort: {localFileEntry._localFileHeader.GetVersionNeededToExtract()}");
+            Console.WriteLine();
+            Console.WriteLine($"General purpose bit flag: {localFileEntry._localFileHeader.GeneralPurposeBitFlag.FormatString()}");
+            Console.WriteLine(localFileEntry._localFileHeader.GeneralPurposeBitFlag.FormatStringAsBits());
         }
         
         Console.WriteLine();
