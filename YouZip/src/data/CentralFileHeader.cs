@@ -41,46 +41,65 @@ public struct CentralFileHeader
     public byte[] FileName { get; set; }
     public byte[] ExtraField { get; set; }
     public byte[] FileComment { get; set; }
-    
-    public CentralFileHeader(
-        byte[] versionMadeBy, 
-        byte[] versionNeededToExtract, 
-        byte[] generalPurposeBitFlag,
-        byte[] compressionMethod, 
-        byte[] lastModFileTime, 
-        byte[] lastModFileDate, 
-        byte[] crc32, 
-        byte[] compressedSize,
-        byte[] uncompressedSize, 
-        byte[] fileNameLength, 
-        byte[] extraFieldLength, 
-        byte[] fileCommentLength,
-        byte[] diskNumberStart, 
-        byte[] internalFileAttributes, 
-        byte[] externalFileAttributes,
-        byte[] relativeOffsetOfLocalHeader, 
-        byte[] fileName, 
-        byte[] extraField, 
-        byte[] fileComment)
+
+    public CentralFileHeader(byte[] input, int startingPosition)
     {
-        VersionMadeBy = versionMadeBy;
-        VersionNeededToExtract = versionNeededToExtract;
-        GeneralPurposeBitFlag = generalPurposeBitFlag;
-        CompressionMethod = compressionMethod;
-        LastModFileTime = lastModFileTime;
-        LastModFileDate = lastModFileDate;
-        Crc32 = crc32;
-        CompressedSize = compressedSize;
-        UncompressedSize = uncompressedSize;
-        FileNameLength = fileNameLength;
-        ExtraFieldLength = extraFieldLength;
-        FileCommentLength = fileCommentLength;
-        DiskNumberStart = diskNumberStart;
-        InternalFileAttributes = internalFileAttributes;
-        ExternalFileAttributes = externalFileAttributes;
-        RelativeOffsetOfLocalHeader = relativeOffsetOfLocalHeader;
-        FileName = fileName;
-        ExtraField = extraField;
-        FileComment = fileComment;
+        startingPosition += CentralFileHeaderSignatureLength;
+
+        VersionMadeBy = input.Subarray(startingPosition, VersionMadeByLength);
+        startingPosition += VersionMadeByLength;
+
+        VersionNeededToExtract = input.Subarray(startingPosition, VersionNeededToExtractLength);
+        startingPosition += VersionNeededToExtractLength;
+
+        GeneralPurposeBitFlag = input.Subarray(startingPosition, GeneralPurposeBitFlagLength);
+        startingPosition += GeneralPurposeBitFlagLength;
+
+        CompressionMethod = input.Subarray(startingPosition, CompressionMethodLength);
+        startingPosition += CompressionMethodLength;
+
+        LastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);
+        startingPosition += LastModFileTimeLength;
+
+        LastModFileDate = input.Subarray(startingPosition, LastModFileDateLength);
+        startingPosition += LastModFileDateLength;
+
+        Crc32 = input.Subarray(startingPosition, Crc32Length);
+        startingPosition += Crc32Length;
+
+        CompressedSize = input.Subarray(startingPosition, CompressedSizeLength);
+        startingPosition += CompressedSizeLength;
+
+        UncompressedSize = input.Subarray(startingPosition, UncompressedSizeLength);
+        startingPosition += UncompressedSizeLength;
+
+        FileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
+        startingPosition += FileNameLengthLength;
+
+        ExtraFieldLength = input.Subarray(startingPosition, ExtraFieldLengthLength);
+        startingPosition += ExtraFieldLengthLength;
+
+        FileCommentLength = input.Subarray(startingPosition, FileCommentLengthLength);
+        startingPosition += FileCommentLengthLength;
+
+        DiskNumberStart = input.Subarray(startingPosition, DiskNumberStartLength);
+        startingPosition += DiskNumberStartLength;
+
+        InternalFileAttributes = input.Subarray(startingPosition, InternalFileAttributesLength);
+        startingPosition += InternalFileAttributesLength;
+
+        ExternalFileAttributes = input.Subarray(startingPosition, ExternalFileAttributesLength);
+        startingPosition += ExternalFileAttributesLength;
+
+        RelativeOffsetOfLocalHeader = input.Subarray(startingPosition, RelativeOffsetOfLocalHeaderLength);
+        startingPosition += RelativeOffsetOfLocalHeaderLength;
+
+        FileName = input.Subarray(startingPosition, FileNameLength.ToUShort());
+        startingPosition += FileNameLength.ToUShort();
+
+        ExtraField = input.Subarray(startingPosition, ExtraFieldLength.ToUShort());
+        startingPosition += ExtraFieldLength.ToUShort();
+
+        FileComment = input.Subarray(startingPosition, FileCommentLength.ToUShort());
     }
 }
