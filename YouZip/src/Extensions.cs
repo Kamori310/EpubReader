@@ -126,4 +126,132 @@ public static class Extensions
         return result > 0;
     }
 
+    public static TimeSpan TimeFromMsDosFormat(this byte[] input)
+    {
+        int[] bitValues = new[] { 1, 2, 4, 8, 16, 32, 64 };
+        
+        var inputAsReversedString = input
+            .Reverse()
+            .Select(it => Convert.ToString(it, 2).PadLeft(8).Replace(' ', '0'))
+            .ToArray()
+            .Aggregate("", (acc, curr) => acc + curr);
+        
+        var hours = inputAsReversedString
+            .Take(5)
+            .Reverse()
+            .Select((character, index) =>
+            {
+                if (character == '0')
+                    return 0;
+                else 
+                    return bitValues[index];
+            })
+            .Aggregate(0, (acc, curr) => acc + curr);
+
+        var minutes = inputAsReversedString
+            .Skip(5)
+            .Take(6)
+            .Reverse()
+            .Select((character, index) =>
+            {
+                if (character == '0')
+                    return 0;
+                else 
+                    return bitValues[index];
+            })
+            .Aggregate(0, (acc, curr) => acc + curr);
+
+        var seconds = inputAsReversedString
+            .Skip(5 + 6)
+            .Take(5)
+            .Reverse()
+            .Select((character, index) =>
+            {
+                if (character == '0')
+                    return 0;
+                else 
+                    return bitValues[index];
+            })
+            .Aggregate(0, (acc, curr) => acc + curr * 2); // * 2 because number of seconds is halved are saved in the format
+        
+        return new TimeSpan(hours,minutes,seconds);
+    }
+
+    public static DateTime DateFromMsDosFormat(this byte[] input)
+    {
+        // 10110001                         01011000
+        // 01011000                         10110001
+        
+        // Actual Date: 2024-05-17
+        // 17      1  0  0  0  1
+        //        16  8  4  2  1
+        
+        // 05      0  1  0  1
+        //         8  4  2  1
+        
+        // 44      0  1  0  1  1  0  0
+        //        64 32 16  8  4  2  1
+        
+        // Year offset since 1980
+        //  64 32 16  8  4  2  1
+        //   0  1  0  1  1  0  0
+        
+        // Month
+        //  8  4  2  1
+        //  0  1  0  1
+        
+        // Day of Month
+        // 16  8  4  2  1
+        //  1  0  0  0  1
+        int[] bitValues = new[] { 1, 2, 4, 8, 16, 32, 64 };
+
+        var inputAsReversedString = input
+            .Reverse()
+            .Select(it => Convert.ToString(it, 2).PadLeft(8).Replace(' ', '0'))
+            .ToArray()
+            .Aggregate("", (acc, curr) => acc + curr);
+
+        var year = inputAsReversedString
+            .Take(7)
+            .Reverse()
+            .Select((character, index) =>
+            {
+                if (character == '0')
+                    return 0;
+                else 
+                    return bitValues[index];
+            })
+            .Aggregate(1980, (acc, curr) => acc + curr);
+
+        var month = inputAsReversedString
+            .Skip(7)
+            .Take(4)
+            .Reverse()
+            .Select(
+                (character, index) =>
+                {
+                    if (character == '0')
+                        return 0;
+                    else
+                        return bitValues[index];
+                })
+            .Aggregate(0, (acc, curr) => acc + curr);
+        
+        var dayOfMonth = inputAsReversedString
+            .Skip(7 + 4)
+            .Take(5)
+            .Reverse()
+            .Select(
+                (character, index) =>
+                {
+                    if (character == '0')
+                        return 0;
+                    else
+                        return bitValues[index];
+                })
+            .Aggregate(0, (acc, curr) => acc + curr);
+
+        return new DateTime(year, month, dayOfMonth);
+    }
+
 }

@@ -91,5 +91,29 @@ public class TestExtensions
             const uint expectedValue = 4294967295;
             Assert.That(valueToBeConverted.ToUInt(), Is.EqualTo(expectedValue));
         }
+
+        [Test]
+        public void Byte_Array_To_DateTime()
+        {
+            byte[] valueToBeConverted = [0b1011_0001, 0b0101_1000];
+            var expectedValue = new DateTime(2024, 5, 17);
+            Assert.That(valueToBeConverted.DateFromMsDosFormat(), Is.EqualTo(expectedValue));
+        }
+
+        [Test]
+        public void Byte_Array_To_TimeSpan()
+        {
+            byte[] valueToBeConverted = [0b0100_0100, 0b0101_1111];
+            var expectedValue = new TimeSpan(11, 58, 8);
+            Assert.That(valueToBeConverted.TimeFromMsDosFormat(), Is.EqualTo(expectedValue));
+        }
+        
+        [Test]
+        public void Byte_Array_To_TimeSpan_2()
+        {
+            byte[] valueToBeConverted = [0b1101_0010, 0b0111_1110];
+            var expectedValue = new TimeSpan(15, 54, 36);
+            Assert.That(valueToBeConverted.TimeFromMsDosFormat(), Is.EqualTo(expectedValue));
+        }
     }
 }

@@ -98,16 +98,12 @@ public class LocalFileHeader
             ExtraFieldLength.ToUShort();
     }
 
-    public ushort GetVersionNeededToExtract()
-    {
-        return VersionNeededToExtract.ToUShort();
-    }
+    public ushort GetVersionNeededToExtract() => 
+        VersionNeededToExtract.ToUShort();
+    
 
     public bool[] GetGeneralPurposeBitFlags()
     {
-        //     int 32768 16394  8192  4096  2048  1024   512   256
-        // byte[0]     0     1     2     3     4     5     6     7
-
         int[] bits = 
             [
                 7, // 0b1000_0000 
@@ -119,11 +115,17 @@ public class LocalFileHeader
                 1, // 0b0000_0010
                 0  // 0b0000_0001
             ];
-        // Todo still wrong
+        
         return GeneralPurposeBitFlag
             .SelectMany(it =>
                 bits.Select(bit =>
                     it.GetBit(bit)))
             .ToArray();
     }
+
+    public ushort GetCompressionMethod() => 
+        CompressionMethod.ToUShort();
+
+    public DateTime GetLastModifiedDateTime() =>
+        LastModFileDate.DateFromMsDosFormat() + LastModFileTime.TimeFromMsDosFormat();
 }
