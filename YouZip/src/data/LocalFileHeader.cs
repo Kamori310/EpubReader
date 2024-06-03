@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace YouZip.data;
+﻿namespace YouZip.data;
 
 public class LocalFileHeader
 {

@@ -84,11 +84,8 @@ public class TestLocalFileHeader
             0x00, 0x00
         ], 0);
 
-        byte[] date = [0b1011_0001, 0b0101_1000];
-        localFileHeader.LastModFileDate = date;
-
-        byte[] time = [0b0100_0100, 0b0101_1111];
-        localFileHeader.LastModFileTime = time;
+        localFileHeader.LastModFileDate = [0b1011_0001, 0b0101_1000];
+        localFileHeader.LastModFileTime = [0b0100_0100, 0b0101_1111];
 
         var expected = new DateTime(2024, 5, 17, 11, 58, 8);
         Assert.That(localFileHeader.GetLastModifiedDateTime(), Is.EqualTo(expected));
