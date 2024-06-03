@@ -12,7 +12,7 @@ public class LocalFileEntry
         //       Look for encryption header 
         _localFileData = input.Subarray(
             startingPosition + _localFileHeader.HeaderLength(), 
-            (int)_localFileHeader.CompressedSize.ToUInt());
+            (int)_localFileHeader.GetCompressedSize());
     }
 
 }

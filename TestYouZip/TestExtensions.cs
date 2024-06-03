@@ -1,6 +1,6 @@
 using YouZip;
 
-namespace TestExtensions;
+namespace TestYouZip;
 
 public class TestExtensions
 {

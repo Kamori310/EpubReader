@@ -26,16 +26,8 @@ public class Unzipper(ILogger<Unzipper> logger)
             Console.WriteLine($"Starting position: {startingPosition}");
             var localFileEntry = new LocalFileEntry(allBytes, startingPosition);
             Console.WriteLine($"Length: {localFileEntry._localFileHeader.HeaderLength() + localFileEntry._localFileData.Length}");
-            Console.WriteLine($"Version needed to extract as bytes: {localFileEntry._localFileHeader.VersionNeededToExtract.FormatString()}");
-            Console.WriteLine($"Version needed to extract as ushort: {localFileEntry._localFileHeader.GetVersionNeededToExtract()}");
-            Console.WriteLine();
-            Console.WriteLine($"General purpose bit flag: {localFileEntry._localFileHeader.GeneralPurposeBitFlag.FormatString()}");
-            Console.WriteLine(localFileEntry._localFileHeader.GeneralPurposeBitFlag.FormatStringAsBits());
-            
-            Console.WriteLine($"Date: ");
-            Console.WriteLine($"{localFileEntry._localFileHeader.LastModFileDate.FormatStringAsBits()}");
-            Console.WriteLine($"Time: ");
-            Console.WriteLine($"{localFileEntry._localFileHeader.LastModFileTime.FormatStringAsBits()}");
+            Console.WriteLine($"File name length: {localFileEntry._localFileHeader.GetFileNameLength()}");
+            Console.WriteLine($"File name: {localFileEntry._localFileHeader.GetFileName()}");
         }
         
         Console.WriteLine();

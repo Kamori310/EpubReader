@@ -1,4 +1,6 @@
-﻿namespace YouZip.data;
+﻿using System.Text;
+
+namespace YouZip.data;
 
 public class LocalFileHeader
 {
@@ -19,63 +21,66 @@ public class LocalFileHeader
     /// <summary>
     /// Saved in ushort format
     /// </summary>
-    public byte[] VersionNeededToExtract;
-    public byte[] GeneralPurposeBitFlag;
-    public byte[] CompressionMethod;
-    public byte[] LastModFileTime;
-    public byte[] LastModFileDate;
-    public byte[] Crc32;
+    private readonly byte[] _versionNeededToExtract;
+    private readonly byte[] _generalPurposeBitFlag;
+    private readonly byte[] _compressionMethod;
+    private readonly byte[] _lastModFileTime;
+    private readonly byte[] _lastModFileDate;
+    /// <summary>
+    /// Contains the crc-32 hash of the file data
+    /// </summary>
+    private readonly byte[] _crc32;
     /// <summary>
     /// Includes the size of the optional data descriptor 
     /// </summary>
-    public byte[] CompressedSize;
-    public byte[] UncompressedSize;
-    public byte[] FileNameLength;
-    public byte[] ExtraFieldLength;
-    public byte[] FileName;
-    public byte[] ExtraField;
+    private readonly byte[] _compressedSize;
+    private readonly byte[] _uncompressedSize;
+    private readonly byte[] _fileNameLength;
+    private readonly byte[] _extraFieldLength;
+    private readonly byte[] _fileName;
+    private readonly byte[] _extraField;
     
     public LocalFileHeader (byte[] input, int startingPosition)
     {
         startingPosition += LocalFileHeaderSignatureLength;
 
-        VersionNeededToExtract = input.Subarray(startingPosition, VersionNeedToExtractLength);
+        _versionNeededToExtract = input.Subarray(startingPosition, VersionNeedToExtractLength);
         startingPosition += VersionNeedToExtractLength;
         
-        GeneralPurposeBitFlag = input.Subarray(startingPosition, GeneralPurposeBitFlagLength);
+        _generalPurposeBitFlag = input.Subarray(startingPosition, GeneralPurposeBitFlagLength);
         startingPosition += GeneralPurposeBitFlagLength;
 
-        CompressionMethod = input.Subarray(startingPosition, CompressionMethodLength);
+        _compressionMethod = input.Subarray(startingPosition, CompressionMethodLength);
         startingPosition += CompressionMethodLength;
 
-        LastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);
+        _lastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);
         startingPosition += LastModFileTimeLength;
 
-        LastModFileDate = input.Subarray(startingPosition, LastModFileDateLength);
+        _lastModFileDate = input.Subarray(startingPosition, LastModFileDateLength);
         startingPosition += LastModFileDateLength;
 
-        Crc32 = input.Subarray(startingPosition, Crc32Length);
+        _crc32 = input.Subarray(startingPosition, Crc32Length);
         startingPosition += Crc32Length;
 
-        CompressedSize = input.Subarray(startingPosition, CompressedSizeLength);
+        _compressedSize = input.Subarray(startingPosition, CompressedSizeLength);
         startingPosition += CompressedSizeLength;
 
-        UncompressedSize = input.Subarray(startingPosition, UncompressedSizeLength);
+        _uncompressedSize = input.Subarray(startingPosition, UncompressedSizeLength);
         startingPosition += UncompressedSizeLength;
 
-        FileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
+        _fileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
         startingPosition += FileNameLengthLength;
         // Console.WriteLine($"File name length: {FileNameLength.ToUShort()}");
 
-        ExtraFieldLength = input.Subarray(startingPosition, ExtraFieldLengthLength);
+        _extraFieldLength = input.Subarray(startingPosition, ExtraFieldLengthLength);
         startingPosition += ExtraFieldLengthLength;
         // Console.WriteLine($"Extra field length: {ExtraFieldLength.ToUShort()}");
 
-        FileName = input.Subarray(startingPosition, FileNameLength.ToUShort());
-        startingPosition += FileNameLength.ToUShort();
+        _fileName = input.Subarray(startingPosition, _fileNameLength.ToUShort());
+        startingPosition += _fileNameLength.ToUShort();
         // Console.WriteLine($"{Encoding.UTF8.GetString(FileName)}");
 
-        ExtraField = input.Subarray(startingPosition, ExtraFieldLength.ToUShort());
+        _extraField = input.Subarray(startingPosition, _extraFieldLength.ToUShort());
     }
 
     public int HeaderLength()
@@ -92,14 +97,13 @@ public class LocalFileHeader
             UncompressedSizeLength +
             FileNameLengthLength +
             ExtraFieldLengthLength +
-            FileNameLength.ToUShort() +
-            ExtraFieldLength.ToUShort();
+            _fileNameLength.ToUShort() +
+            _extraFieldLength.ToUShort();
     }
 
     public ushort GetVersionNeededToExtract() => 
-        VersionNeededToExtract.ToUShort();
+        _versionNeededToExtract.ToUShort();
     
-
     public bool[] GetGeneralPurposeBitFlags()
     {
         int[] bits = 
@@ -114,7 +118,7 @@ public class LocalFileHeader
                 0  // 0b0000_0001
             ];
         
-        return GeneralPurposeBitFlag
+        return _generalPurposeBitFlag
             .SelectMany(it =>
                 bits.Select(bit =>
                     it.GetBit(bit)))
@@ -122,8 +126,26 @@ public class LocalFileHeader
     }
 
     public ushort GetCompressionMethod() => 
-        CompressionMethod.ToUShort();
+        _compressionMethod.ToUShort();
 
     public DateTime GetLastModifiedDateTime() =>
-        LastModFileDate.DateFromMsDosFormat() + LastModFileTime.TimeFromMsDosFormat();
+        _lastModFileDate.DateFromMsDosFormat() + _lastModFileTime.TimeFromMsDosFormat();
+
+    public uint GetCompressedSize() =>
+        _compressedSize.ToUInt();
+
+    public uint GetUncompressedSize() => 
+        _uncompressedSize.ToUInt();
+
+    public uint GetFileNameLength() =>
+        _fileNameLength.ToUShort();
+
+    public uint GetExtraFieldLength() =>
+        _extraFieldLength.ToUShort();
+    
+    public string GetFileName() => 
+        Encoding.UTF8.GetString(_fileName);
+
+    public string GetExtraField() =>
+        Encoding.UTF8.GetString(_extraField);
 }

@@ -7,7 +7,7 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <RootNamespace>TestExtensions</RootNamespace>
+    <RootNamespace>TestYouZip</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
