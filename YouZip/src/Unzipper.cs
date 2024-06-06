@@ -26,8 +26,8 @@ public class Unzipper(ILogger<Unzipper> logger)
             Console.WriteLine($"Starting position: {startingPosition}");
             var localFileEntry = new LocalFileEntry(allBytes, startingPosition);
             Console.WriteLine($"Length: {localFileEntry._localFileHeader.HeaderLength() + localFileEntry._localFileData.Length}");
-            Console.WriteLine($"File name length: {localFileEntry._localFileHeader.GetFileNameLength()}");
-            Console.WriteLine($"File name: {localFileEntry._localFileHeader.GetFileName()}");
+            Console.WriteLine($"File name length: {localFileEntry._localFileHeader.FileNameLength}");
+            Console.WriteLine($"File name: {localFileEntry._localFileHeader.FileName}");
         }
         
         Console.WriteLine();
@@ -37,7 +37,7 @@ public class Unzipper(ILogger<Unzipper> logger)
         {
             Console.WriteLine($"Starting position: {startingPosition}");
             var header = new CentralFileHeader(allBytes, startingPosition);
-            Console.WriteLine(Encoding.UTF8.GetString(header.FileName));
+            Console.WriteLine(header.FileName);
         }
         
         

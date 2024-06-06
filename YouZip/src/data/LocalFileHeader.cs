@@ -18,43 +18,47 @@ public class LocalFileHeader
     public const int FileNameLengthLength = 2;
     public const int ExtraFieldLengthLength = 2;
 
+    private readonly byte[] _lastModFileTime;
+    private readonly byte[] _lastModFileDate;
+    
     /// <summary>
     /// Saved in ushort format
     /// </summary>
-    private readonly byte[] _versionNeededToExtract;
-    private readonly byte[] _generalPurposeBitFlag;
-    private readonly byte[] _compressionMethod;
-    private readonly byte[] _lastModFileTime;
-    private readonly byte[] _lastModFileDate;
+    public ushort VersionNeededToExtract { get; }
+    public bool[] GeneralPurposeBitFlag { get; }
+    public ushort CompressionMethod { get; }
+
+    public DateTime LastModFileDateTime => CalculateLastModifiedDateTime();
+
     /// <summary>
     /// Contains the crc-32 hash of the file data
     /// Use System.IO.Hashing
     /// </summary>
-    private readonly byte[] _crc32;
+    public byte[] Crc32 { get; }
     /// <summary>
     /// Size of file data. Contains size of decryption header if present.
     /// If the archive is in ZIP64 format and value of this field is 0xff_ff_ff_ff
     /// the size will be in the corresponding 8 byte ZIP64 extended information
     /// extra field.  
     /// </summary>
-    private readonly byte[] _compressedSize;
-    private readonly byte[] _uncompressedSize;
-    private readonly byte[] _fileNameLength;
-    private readonly byte[] _extraFieldLength;
-    private readonly byte[] _fileName;
-    private readonly byte[] _extraField;
+    public uint CompressedSize { get; }
+    public uint UncompressedSize { get; }
+    public ushort FileNameLength { get; }
+    public ushort ExtraFieldLength { get; }
+    public string FileName { get; }
+    public string ExtraField { get; }
     
     public LocalFileHeader (byte[] input, int startingPosition)
     {
         startingPosition += LocalFileHeaderSignatureLength;
-
-        _versionNeededToExtract = input.Subarray(startingPosition, VersionNeedToExtractLength);
+        
+        VersionNeededToExtract = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += VersionNeedToExtractLength;
         
-        _generalPurposeBitFlag = input.Subarray(startingPosition, GeneralPurposeBitFlagLength);
+        GeneralPurposeBitFlag = CalculateGeneralPurposeBitFlag(input, startingPosition);
         startingPosition += GeneralPurposeBitFlagLength;
 
-        _compressionMethod = input.Subarray(startingPosition, CompressionMethodLength);
+        CompressionMethod = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += CompressionMethodLength;
 
         _lastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);
@@ -63,28 +67,25 @@ public class LocalFileHeader
         _lastModFileDate = input.Subarray(startingPosition, LastModFileDateLength);
         startingPosition += LastModFileDateLength;
 
-        _crc32 = input.Subarray(startingPosition, Crc32Length);
+        Crc32 = input.Subarray(startingPosition, Crc32Length);
         startingPosition += Crc32Length;
 
-        _compressedSize = input.Subarray(startingPosition, CompressedSizeLength);
+        CompressedSize = BitConverter.ToUInt32(input, startingPosition);
         startingPosition += CompressedSizeLength;
 
-        _uncompressedSize = input.Subarray(startingPosition, UncompressedSizeLength);
+        UncompressedSize = BitConverter.ToUInt32(input, startingPosition);
         startingPosition += UncompressedSizeLength;
 
-        _fileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
+        FileNameLength = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += FileNameLengthLength;
-        // Console.WriteLine($"File name length: {FileNameLength.ToUShort()}");
 
-        _extraFieldLength = input.Subarray(startingPosition, ExtraFieldLengthLength);
+        ExtraFieldLength = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += ExtraFieldLengthLength;
-        // Console.WriteLine($"Extra field length: {ExtraFieldLength.ToUShort()}");
 
-        _fileName = input.Subarray(startingPosition, _fileNameLength.ToUShort());
-        startingPosition += _fileNameLength.ToUShort();
-        // Console.WriteLine($"{Encoding.UTF8.GetString(FileName)}");
+        FileName = Encoding.UTF8.GetString(input.Subarray(startingPosition, FileNameLength));
+        startingPosition += FileNameLength;
 
-        _extraField = input.Subarray(startingPosition, _extraFieldLength.ToUShort());
+        ExtraField = Encoding.UTF8.GetString(input.Subarray(startingPosition, ExtraFieldLength));
     }
 
     public int HeaderLength()
@@ -101,55 +102,25 @@ public class LocalFileHeader
             UncompressedSizeLength +
             FileNameLengthLength +
             ExtraFieldLengthLength +
-            _fileNameLength.ToUShort() +
-            _extraFieldLength.ToUShort();
+            FileNameLength +
+            ExtraFieldLength;
     }
-
-    public ushort GetVersionNeededToExtract() => 
-        _versionNeededToExtract.ToUShort();
     
-    public bool[] GetGeneralPurposeBitFlags()
-    {
-        int[] bits = 
-            [
-                7, // 0b1000_0000 
-                6, // 0b0100_0000
-                5, // 0b0010_0000
-                4, // 0b0001_0000
-                3, // 0b0000_1000
-                2, // 0b0000_0100
-                1, // 0b0000_0010
-                0  // 0b0000_0001
-            ];
-        
-        return _generalPurposeBitFlag
-            .SelectMany(it =>
-                bits.Select(bit =>
-                    it.GetBit(bit)))
+    private static bool[] CalculateGeneralPurposeBitFlag(byte[] input, int startingPosition)
+    { 
+        return input
+            .Skip(startingPosition)
+            .Take(GeneralPurposeBitFlagLength)
+            .SelectMany(
+                it =>
+                    Enumerable
+                        .Range(0, 8)
+                        .Reverse()
+                        .Select(
+                            bit => (it & (1 << bit)) != 0))
             .ToArray();
     }
 
-    public ushort GetCompressionMethod() => 
-        _compressionMethod.ToUShort();
-
-    public DateTime GetLastModifiedDateTime() =>
+    private DateTime CalculateLastModifiedDateTime() =>
         _lastModFileDate.DateFromMsDosFormat() + _lastModFileTime.TimeFromMsDosFormat();
-
-    public uint GetCompressedSize() =>
-        _compressedSize.ToUInt();
-
-    public uint GetUncompressedSize() => 
-        _uncompressedSize.ToUInt();
-
-    public ushort GetFileNameLength() =>
-        _fileNameLength.ToUShort();
-
-    public ushort GetExtraFieldLength() =>
-        _extraFieldLength.ToUShort();
-    
-    public string GetFileName() => 
-        Encoding.UTF8.GetString(_fileName);
-
-    public string GetExtraField() =>
-        Encoding.UTF8.GetString(_extraField);
 }

@@ -6,58 +6,77 @@ public struct CentralFileHeader
 {
     public static readonly byte[] CentralFileHeaderSignature = [0x50, 0x4b, 0x01, 0x02];
     
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int CentralFileHeaderSignatureLength = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int VersionMadeByLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int VersionNeededToExtractLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int GeneralPurposeBitFlagLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int CompressionMethodLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int LastModFileTimeLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int LastModFileDateLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int Crc32Length = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int CompressedSizeLength = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int UncompressedSizeLength = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int FileNameLengthLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int ExtraFieldLengthLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int FileCommentLengthLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int DiskNumberStartLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int InternalFileAttributesLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int ExternalFileAttributesLength = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int RelativeOffsetOfLocalHeaderLength = 4;
 
-    private readonly byte[] _versionMadeBy;
-    private readonly byte[] _versionNeededToExtract;
-    private readonly byte[] _generalPurposeBitFlag;
-    private readonly byte[] _compressionMethod;
+    public ushort VersionMadeBy { get; }
+    public ushort VersionNeededToExtract { get; }
+    public bool[] GeneralPurposeBitFlag { get; }
+    public ushort CompressionMethod { get; }
+    public DateTime LastModFileDateTime => CalculateLastModifiedDateTime();
+    public byte[] Crc32 { get; }
+    public uint CompressedSize { get; }
+    public uint UncompressedSize { get; }
+    public ushort FileNameLength { get; }
+    public ushort ExtraFieldLength { get; }
+    public ushort FileCommentLength { get; }
+    public ushort DiskNumberStart { get; }
+    public byte[] InternalFileAttributes { get; }
+    public byte[] ExternalFileAttributes { get; }
+    public uint RelativeOffsetOfLocalHeader { get; }
+    public string FileName { get; }
+    public string ExtraField { get; }
+    public string FileComment { get; }
+    
     private readonly byte[] _lastModFileTime;
     private readonly byte[] _lastModFileDate;
-    private readonly byte[] _crc32;
-    private readonly byte[] _compressedSize;
-    private readonly byte[] _uncompressedSize;
-    private readonly byte[] _fileNameLength;
-    private readonly byte[] _extraFieldLength;
-    private readonly byte[] _fileCommentLength;
-    private readonly byte[] _diskNumberStart;
-    private readonly byte[] _internalFileAttributes;
-    private readonly byte[] _externalFileAttributes;
-    private readonly byte[] _relativeOffsetOfLocalHeader;
-    private readonly byte[] _fileName;
-    private readonly byte[] _extraField;
-    private readonly byte[] _fileComment;
 
     public CentralFileHeader(byte[] input, int startingPosition)
     {
         startingPosition += CentralFileHeaderSignatureLength;
 
-        _versionMadeBy = input.Subarray(startingPosition, VersionMadeByLength);
+        VersionMadeBy = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += VersionMadeByLength;
 
-        _versionNeededToExtract = input.Subarray(startingPosition, VersionNeededToExtractLength);
+        VersionNeededToExtract = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += VersionNeededToExtractLength;
-
-        _generalPurposeBitFlag = input.Subarray(startingPosition, GeneralPurposeBitFlagLength);
+        
+        GeneralPurposeBitFlag = CalculateGeneralPurposeBitFlag(input, startingPosition);
         startingPosition += GeneralPurposeBitFlagLength;
 
-        _compressionMethod = input.Subarray(startingPosition, CompressionMethodLength);
+        CompressionMethod = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += CompressionMethodLength;
 
         _lastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);
@@ -66,43 +85,45 @@ public struct CentralFileHeader
         _lastModFileDate = input.Subarray(startingPosition, LastModFileDateLength);
         startingPosition += LastModFileDateLength;
 
-        _crc32 = input.Subarray(startingPosition, Crc32Length);
+        Crc32 = input.Subarray(startingPosition, Crc32Length);
         startingPosition += Crc32Length;
 
-        _compressedSize = input.Subarray(startingPosition, CompressedSizeLength);
+        CompressedSize = BitConverter.ToUInt32(input, startingPosition);
         startingPosition += CompressedSizeLength;
 
-        _uncompressedSize = input.Subarray(startingPosition, UncompressedSizeLength);
+        UncompressedSize = BitConverter.ToUInt32(input, startingPosition);
         startingPosition += UncompressedSizeLength;
 
-        _fileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
+        // _fileNameLength = input.Subarray(startingPosition, FileNameLengthLength);
+        FileNameLength = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += FileNameLengthLength;
 
-        _extraFieldLength = input.Subarray(startingPosition, ExtraFieldLengthLength);
+        ExtraFieldLength = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += ExtraFieldLengthLength;
 
-        _fileCommentLength = input.Subarray(startingPosition, FileCommentLengthLength);
+        FileCommentLength = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += FileCommentLengthLength;
 
-        _diskNumberStart = input.Subarray(startingPosition, DiskNumberStartLength);
+        DiskNumberStart = BitConverter.ToUInt16(input, startingPosition);
         startingPosition += DiskNumberStartLength;
 
-        _internalFileAttributes = input.Subarray(startingPosition, InternalFileAttributesLength);
+        InternalFileAttributes = input.Subarray(startingPosition, InternalFileAttributesLength);
         startingPosition += InternalFileAttributesLength;
 
-        _externalFileAttributes = input.Subarray(startingPosition, ExternalFileAttributesLength);
+        ExternalFileAttributes = input.Subarray(startingPosition, ExternalFileAttributesLength);
         startingPosition += ExternalFileAttributesLength;
-
-        _relativeOffsetOfLocalHeader = input.Subarray(startingPosition, RelativeOffsetOfLocalHeaderLength);
+        
+        // _relativeOffsetOfLocalHeader = input.Subarray(startingPosition, RelativeOffsetOfLocalHeaderLength);
+        RelativeOffsetOfLocalHeader = BitConverter.ToUInt32(input, startingPosition);
         startingPosition += RelativeOffsetOfLocalHeaderLength;
 
-        _fileName = input.Subarray(startingPosition, _fileNameLength.ToUShort());
-        startingPosition += _fileNameLength.ToUShort();
+        FileName = Encoding.UTF8.GetString(input.Subarray(startingPosition, FileNameLength));
+        startingPosition += FileNameLength;
 
-        _extraField = input.Subarray(startingPosition, _extraFieldLength.ToUShort());
-        startingPosition += _extraFieldLength.ToUShort();
+        ExtraField = Encoding.UTF8.GetString(input.Subarray(startingPosition, ExtraFieldLength));
+        startingPosition += ExtraFieldLength;
 
-        _fileComment = input.Subarray(startingPosition, _fileCommentLength.ToUShort());
+        FileComment = Encoding.UTF8.GetString(input.Subarray(startingPosition, FileCommentLength));
     }
 
     public int HeaderLength()
@@ -125,77 +146,26 @@ public struct CentralFileHeader
             InternalFileAttributesLength +
             ExternalFileAttributesLength +
             RelativeOffsetOfLocalHeaderLength +
-            _fileNameLength.ToUShort() +
-            _extraFieldLength.ToUShort() +
-            _fileCommentLength.ToUShort();
+            FileNameLength +
+            ExtraFieldLength +
+            FileCommentLength;
     }
 
-    public ushort GetVersionMadeBy() =>
-        _versionMadeBy.ToUShort();
-    
-    public ushort GetVersionNeededToExtract() => 
-        _versionNeededToExtract.ToUShort();
-
-    public bool[] GetGeneralPurposeBitFlag()
-    {
-        int[] bits = 
-            [
-                7, // 0b1000_0000 
-                6, // 0b0100_0000
-                5, // 0b0010_0000
-                4, // 0b0001_0000
-                3, // 0b0000_1000
-                2, // 0b0000_0100
-                1, // 0b0000_0010
-                0  // 0b0000_0001
-            ];
-        
-        return _generalPurposeBitFlag
-            .SelectMany(it =>
-                bits.Select(bit =>
-                    it.GetBit(bit)))
+    private static bool[] CalculateGeneralPurposeBitFlag(byte[] input, int startingPosition)
+    { 
+        return input
+            .Skip(startingPosition)
+            .Take(GeneralPurposeBitFlagLength)
+            .SelectMany(
+                it =>
+                    Enumerable
+                        .Range(0, 8)
+                        .Reverse()
+                        .Select(
+                            bit => (it & (1 << bit)) != 0))
             .ToArray();
     }
 
-    public ushort GetCompressionMethod() =>
-        _compressionMethod.ToUShort();
-
-    public DateTime GetLastModifiedDateTime =>
+    private DateTime CalculateLastModifiedDateTime() =>
         _lastModFileDate.DateFromMsDosFormat() + _lastModFileTime.TimeFromMsDosFormat();
-
-    public uint GetCompressedSize() =>
-        _compressedSize.ToUInt();
-
-    public uint GetUncompressedSize() =>
-        _uncompressedSize.ToUInt();
-
-    public ushort GetFileNameLength() =>
-        _fileNameLength.ToUShort();
-
-    public ushort GetExtraFieldLength() =>
-        _extraFieldLength.ToUShort();
-
-    public ushort GetFileCommentLength() =>
-        _fileCommentLength.ToUShort();
-
-    public ushort GetDiskNumberStart() =>
-        _diskNumberStart.ToUShort();
-
-    public ushort GetInternalFileAttributes() =>
-        _internalFileAttributes.ToUShort();
-
-    public uint GetExternalFileAttributes() =>
-        _externalFileAttributes.ToUInt();
-
-    public uint GetRelativeOffsetOfLocalHeader() =>
-        _relativeOffsetOfLocalHeader.ToUInt();
-
-    public string GetFileName() =>
-        Encoding.UTF8.GetString(_fileName);
-
-    public string GetExtraField() =>
-        Encoding.UTF8.GetString(_extraField);
-
-    public string GetFileComment() =>
-        Encoding.UTF8.GetString(_fileComment);
 }

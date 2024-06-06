@@ -98,7 +98,7 @@ public class TestLocalFileHeader
             false, false, false, false, false, false, false, false
         ];
         
-        Assert.That(localFileHeader.GetGeneralPurposeBitFlags(), Is.EqualTo(desiredOutput));
+        Assert.That(localFileHeader.GeneralPurposeBitFlag, Is.EqualTo(desiredOutput));
     }
 
     [Test]
@@ -127,7 +127,7 @@ public class TestLocalFileHeader
             false, false, false, false, false, false, false, true
         ];
         
-        Assert.That(localFileHeader.GetGeneralPurposeBitFlags(), Is.EqualTo(desiredOutput));
+        Assert.That(localFileHeader.GeneralPurposeBitFlag, Is.EqualTo(desiredOutput));
     }
 
     [Test]
@@ -151,6 +151,6 @@ public class TestLocalFileHeader
         ], 0);
 
         var expected = new DateTime(2024, 5, 17, 11, 58, 8);
-        Assert.That(localFileHeader.GetLastModifiedDateTime(), Is.EqualTo(expected));
+        Assert.That(localFileHeader.LastModFileDateTime, Is.EqualTo(expected));
     }
 }

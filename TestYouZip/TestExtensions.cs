@@ -75,6 +75,13 @@ public class TestExtensions
             const uint expectedValue = 1;
             Assert.That(valueToBeConverted.ToUInt(), Is.EqualTo(expectedValue));
         }
+
+        [Test]
+        public void UInt_Little_Endian_BitConverter()
+        {
+            byte[] valueToBeConverted = [0x01, 0x00, 0x00, 0x00];
+            Assert.That(BitConverter.ToUInt32(valueToBeConverted), Is.EqualTo(1));
+        }
         
         [Test]
         public void Byte_Array_To_UInt_Little_Endian_Test_2()
@@ -115,5 +122,6 @@ public class TestExtensions
             var expectedValue = new TimeSpan(15, 54, 36);
             Assert.That(valueToBeConverted.TimeFromMsDosFormat(), Is.EqualTo(expectedValue));
         }
+        
     }
 }
