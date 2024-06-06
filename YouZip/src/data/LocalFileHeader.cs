@@ -7,15 +7,25 @@ public class LocalFileHeader
     public static readonly byte[] LocalFileHeaderSignature = [0x50, 0x4b, 0x03, 0x04];
     
     public const int LocalFileHeaderSignatureLength = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int VersionNeedToExtractLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int GeneralPurposeBitFlagLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int CompressionMethodLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int LastModFileTimeLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int LastModFileDateLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int Crc32Length = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int CompressedSizeLength = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int UncompressedSizeLength = 4;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int FileNameLengthLength = 2;
+    // ReSharper disable once MemberCanBePrivate.Global
     public const int ExtraFieldLengthLength = 2;
 
     private readonly byte[] _lastModFileTime;
