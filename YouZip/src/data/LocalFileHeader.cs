@@ -28,10 +28,14 @@ public class LocalFileHeader
     private readonly byte[] _lastModFileDate;
     /// <summary>
     /// Contains the crc-32 hash of the file data
+    /// Use System.IO.Hashing
     /// </summary>
     private readonly byte[] _crc32;
     /// <summary>
-    /// Includes the size of the optional data descriptor 
+    /// Size of file data. Contains size of decryption header if present.
+    /// If the archive is in ZIP64 format and value of this field is 0xff_ff_ff_ff
+    /// the size will be in the corresponding 8 byte ZIP64 extended information
+    /// extra field.  
     /// </summary>
     private readonly byte[] _compressedSize;
     private readonly byte[] _uncompressedSize;
@@ -137,10 +141,10 @@ public class LocalFileHeader
     public uint GetUncompressedSize() => 
         _uncompressedSize.ToUInt();
 
-    public uint GetFileNameLength() =>
+    public ushort GetFileNameLength() =>
         _fileNameLength.ToUShort();
 
-    public uint GetExtraFieldLength() =>
+    public ushort GetExtraFieldLength() =>
         _extraFieldLength.ToUShort();
     
     public string GetFileName() => 
