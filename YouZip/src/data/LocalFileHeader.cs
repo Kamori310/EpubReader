@@ -36,7 +36,7 @@ public class LocalFileHeader
     /// </summary>
     public ushort VersionNeededToExtract { get; }
     public bool[] GeneralPurposeBitFlag { get; }
-    public ushort CompressionMethod { get; }
+    public CompressionMethod CompressionMethod { get; }
 
     public DateTime LastModFileDateTime => CalculateLastModifiedDateTime();
 
@@ -68,7 +68,7 @@ public class LocalFileHeader
         GeneralPurposeBitFlag = CalculateGeneralPurposeBitFlag(input, startingPosition);
         startingPosition += GeneralPurposeBitFlagLength;
 
-        CompressionMethod = BitConverter.ToUInt16(input, startingPosition);
+        CompressionMethod = (CompressionMethod)BitConverter.ToUInt16(input, startingPosition);
         startingPosition += CompressionMethodLength;
 
         _lastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);

@@ -11,14 +11,7 @@ public class Unzipper(ILogger<Unzipper> logger)
     {
         var allBytes = File.ReadAllBytes(filename);
         logger.LogDebug($"File length: {allBytes.Length.ToString()}");
-        // logger.LogDebug($"Base 16: {Convert.ToString(allBytes[0], 16)}");
-        // logger.LogDebug($"Base  2: {Convert.ToString(allBytes[0], 2)}");
-        // logger.LogDebug($"Base 10: {Convert.ToString(allBytes[0], 10)}");
         
-        // Console.WriteLine(allBytes.FormatString());
-
-        // GetLocalFileHeaders(allBytes);
-
         Console.WriteLine("Local File Headers");
         foreach (var startingPosition in FindSignatures(
                      allBytes, LocalFileHeader.LocalFileHeaderSignature))
@@ -28,6 +21,11 @@ public class Unzipper(ILogger<Unzipper> logger)
             Console.WriteLine($"Length: {localFileEntry._localFileHeader.HeaderLength() + localFileEntry._localFileData.Length}");
             Console.WriteLine($"File name length: {localFileEntry._localFileHeader.FileNameLength}");
             Console.WriteLine($"File name: {localFileEntry._localFileHeader.FileName}");
+            
+            Console.WriteLine($"Compression Method: {localFileEntry._localFileHeader.CompressionMethod}");
+            Console.WriteLine($"Compressed Size: {localFileEntry._localFileHeader.CompressedSize}");
+            Console.WriteLine($"Uncompressed Size: {localFileEntry._localFileHeader.UncompressedSize}");
+
         }
         
         Console.WriteLine();
@@ -150,4 +148,6 @@ public class Unzipper(ILogger<Unzipper> logger)
 
         return result;
     }
+
+    public CompressionMethod Test(CompressionMethod input) => input;
 }
