@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using YouZip.data;
+using YouZip.Extensions;
 
 namespace YouZip;
 
@@ -13,31 +14,37 @@ public class Unzipper(ILogger<Unzipper> logger)
         logger.LogDebug($"File length: {allBytes.Length.ToString()}");
         
         Console.WriteLine("Local File Headers");
-        foreach (var startingPosition in FindSignatures(
-                     allBytes, LocalFileHeader.LocalFileHeaderSignature))
+        foreach (
+            var startingPosition 
+            in FindSignatures(allBytes, LocalFileHeader.LocalFileHeaderSignature))
         {
             Console.WriteLine($"Starting position: {startingPosition}");
             var localFileEntry = new LocalFileEntry(allBytes, startingPosition);
-            Console.WriteLine($"Length: {localFileEntry._localFileHeader.HeaderLength() + localFileEntry._localFileData.Length}");
-            Console.WriteLine($"File name length: {localFileEntry._localFileHeader.FileNameLength}");
-            Console.WriteLine($"File name: {localFileEntry._localFileHeader.FileName}");
+            Console.WriteLine($"Length: {localFileEntry.Header.HeaderLength() + localFileEntry.Data.Length}");
+            Console.WriteLine($"File name length: {localFileEntry.Header.FileNameLength}");
+            Console.WriteLine($"File name: {localFileEntry.Header.FileName}");
             
-            Console.WriteLine($"Compression Method: {localFileEntry._localFileHeader.CompressionMethod}");
-            Console.WriteLine($"Compressed Size: {localFileEntry._localFileHeader.CompressedSize}");
-            Console.WriteLine($"Uncompressed Size: {localFileEntry._localFileHeader.UncompressedSize}");
-
+            Console.WriteLine($"Version Needed To Extract: {localFileEntry.Header.VersionNeededToExtract}");
+            Console.WriteLine($"General Purpose Bit Flag: {localFileEntry.Header.GeneralPurposeBitFlag.FormatString()}");
+            Console.WriteLine($"Compression Method: {localFileEntry.Header.CompressionMethod}");
+            Console.WriteLine($"Compressed Size: {localFileEntry.Header.CompressedSize}");
+            Console.WriteLine($"Uncompressed Size: {localFileEntry.Header.UncompressedSize}");
+            
+            Console.WriteLine();
+            Console.WriteLine($"Data: ");
+            Console.WriteLine($"{localFileEntry.Data.Take(64).ToArray().FormatStringAsBits()}");
         }
         
         Console.WriteLine();
         Console.WriteLine("Central File Headers");
-        foreach (var startingPosition in FindSignatures(
-                     allBytes, CentralFileHeader.CentralFileHeaderSignature))
+        foreach (
+            var startingPosition 
+            in FindSignatures(allBytes, CentralFileHeader.CentralFileHeaderSignature))
         {
             Console.WriteLine($"Starting position: {startingPosition}");
             var header = new CentralFileHeader(allBytes, startingPosition);
             Console.WriteLine(header.FileName);
         }
-        
         
     }
 
@@ -148,6 +155,4 @@ public class Unzipper(ILogger<Unzipper> logger)
 
         return result;
     }
-
-    public CompressionMethod Test(CompressionMethod input) => input;
 }

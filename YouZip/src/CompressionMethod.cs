@@ -2,7 +2,7 @@
 
 public enum CompressionMethod
 {
-    TheFileIsStored = 0,
+    TheFileIsStoredNoCompression = 0,
     TheFileIsShrunk = 1,
     TheFileIsCompressedFactor1 = 2,
     TheFileIsCompressedFactor2 = 3,
@@ -13,21 +13,22 @@ public enum CompressionMethod
     TheFileIsDeflated = 8,
     EnhanceDeflatingUsingDeflate64 = 9,
     PkwareDataCompressionLibraryImploding = 10,
-    ReservedByPkware = 11,
+    // ReservedByPkware = 11,
     FileIsCompressedUsingBZip2 = 12,
-    ReservedByPkware2 = 13,
+    // ReservedByPkware = 13,
     Lzma = 14,
-    ReservedByPkware3 = 15,
+    // ReservedByPkware = 15,
     IbmZOsCmpscCompression = 16,
-    ReservedByPkware4 = 17,
+    // ReservedByPkware = 17,
     FileIsCompressedUsingIbmTerse =  18,
     IbmLz77ZArchitecture  = 19,
-    Deprecated = 20,
+    // Deprecated = 20,
     ZstandardCompression = 93,
     Mp3Compression = 94,
     XzCompression = 95,
     JpegVariant  = 96,
     WavPackCompressedData = 97,
+    // ReSharper disable once InconsistentNaming
     PPMdVersionIRev1 = 98,
     AeXEncryptionMarker = 99
 }

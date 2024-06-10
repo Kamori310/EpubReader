@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 
-namespace YouZip;
+namespace YouZip.Extensions;
 
-public static class Extensions
+public static class ByteArrayExtensions
 {
     public static ushort ToUShort(this byte[] input, bool littleEndian = true)
     {

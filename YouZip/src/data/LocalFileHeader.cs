@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using YouZip.Extensions;
 
 namespace YouZip.data;
 
@@ -28,16 +29,12 @@ public class LocalFileHeader
     // ReSharper disable once MemberCanBePrivate.Global
     public const int ExtraFieldLengthLength = 2;
 
-    private readonly byte[] _lastModFileTime;
-    private readonly byte[] _lastModFileDate;
-    
     /// <summary>
     /// Saved in ushort format
     /// </summary>
     public ushort VersionNeededToExtract { get; }
     public bool[] GeneralPurposeBitFlag { get; }
     public CompressionMethod CompressionMethod { get; }
-
     public DateTime LastModFileDateTime => CalculateLastModifiedDateTime();
 
     /// <summary>
@@ -45,6 +42,7 @@ public class LocalFileHeader
     /// Use System.IO.Hashing
     /// </summary>
     public byte[] Crc32 { get; }
+    
     /// <summary>
     /// Size of file data. Contains size of decryption header if present.
     /// If the archive is in ZIP64 format and value of this field is 0xff_ff_ff_ff
@@ -57,6 +55,9 @@ public class LocalFileHeader
     public ushort ExtraFieldLength { get; }
     public string FileName { get; }
     public string ExtraField { get; }
+    
+    private readonly byte[] _lastModFileTime;
+    private readonly byte[] _lastModFileDate;
     
     public LocalFileHeader (byte[] input, int startingPosition)
     {
