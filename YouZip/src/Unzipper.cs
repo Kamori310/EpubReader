@@ -14,26 +14,48 @@ public class Unzipper(ILogger<Unzipper> logger)
         logger.LogDebug($"File length: {allBytes.Length.ToString()}");
         
         Console.WriteLine("Local File Headers");
-        foreach (
-            var startingPosition 
-            in FindSignatures(allBytes, LocalFileHeader.LocalFileHeaderSignature))
-        {
-            Console.WriteLine($"Starting position: {startingPosition}");
-            var localFileEntry = new LocalFileEntry(allBytes, startingPosition);
-            Console.WriteLine($"Length: {localFileEntry.Header.HeaderLength() + localFileEntry.Data.Length}");
-            Console.WriteLine($"File name length: {localFileEntry.Header.FileNameLength}");
-            Console.WriteLine($"File name: {localFileEntry.Header.FileName}");
-            
-            Console.WriteLine($"Version Needed To Extract: {localFileEntry.Header.VersionNeededToExtract}");
-            Console.WriteLine($"General Purpose Bit Flag: {localFileEntry.Header.GeneralPurposeBitFlag.FormatString()}");
-            Console.WriteLine($"Compression Method: {localFileEntry.Header.CompressionMethod}");
-            Console.WriteLine($"Compressed Size: {localFileEntry.Header.CompressedSize}");
-            Console.WriteLine($"Uncompressed Size: {localFileEntry.Header.UncompressedSize}");
-            
-            Console.WriteLine();
-            Console.WriteLine($"Data: ");
-            Console.WriteLine($"{localFileEntry.Data.Take(64).ToArray().FormatStringAsBits()}");
-        }
+        // foreach (
+        //     var startingPosition 
+        //     in FindSignatures(allBytes, LocalFileHeader.LocalFileHeaderSignature))
+        // {
+        //     Console.WriteLine($"Starting position: {startingPosition}");
+        //     var localFileEntry = new LocalFileEntry(allBytes, startingPosition);
+        //     Console.WriteLine($"Length: {localFileEntry.Header.HeaderLength() + localFileEntry.Data.Length} \tHeader length: {localFileEntry.Header.HeaderLength()} \tData length: {localFileEntry.Data.Length}");
+        //     Console.WriteLine($"File name length: {localFileEntry.Header.FileNameLength}");
+        //     Console.WriteLine($"File name: {localFileEntry.Header.FileName}");
+        //     
+        //     Console.WriteLine($"Version Needed To Extract: {localFileEntry.Header.VersionNeededToExtract}");
+        //     Console.WriteLine($"General Purpose Bit Flag: {localFileEntry.Header.GeneralPurposeBitFlag.FormatString()}");
+        //     Console.WriteLine($"Compression Method: {localFileEntry.Header.CompressionMethod}");
+        //     Console.WriteLine($"Compressed Size: {localFileEntry.Header.CompressedSize}");
+        //     Console.WriteLine($"Uncompressed Size: {localFileEntry.Header.UncompressedSize}");
+        //     
+        //     Console.WriteLine();
+        //     Console.WriteLine($"Data: ");
+        //     Console.WriteLine($"{localFileEntry.Data.Take(157).ToArray().FormatStringAsBits()}");
+        // }
+
+        // var startingPositions = FindSignatures(allBytes, LocalFileHeader.LocalFileHeaderSignature).ToArray();
+        // for (var i = 0; i < 4; i++)
+        // {
+        //     var startingPosition = startingPositions[i];
+        //     
+        //     Console.WriteLine($"Starting position: {startingPosition}");
+        //     var localFileEntry = new LocalFileEntry(allBytes, startingPosition);
+        //     Console.WriteLine($"Length: {localFileEntry.Header.HeaderLength() + localFileEntry.Data.Length} \tHeader length: {localFileEntry.Header.HeaderLength()} \tData length: {localFileEntry.Data.Length}");
+        //     Console.WriteLine($"File name length: {localFileEntry.Header.FileNameLength}");
+        //     Console.WriteLine($"File name: {localFileEntry.Header.FileName}");
+        //     
+        //     Console.WriteLine($"Version Needed To Extract: {localFileEntry.Header.VersionNeededToExtract}");
+        //     Console.WriteLine($"General Purpose Bit Flag: {localFileEntry.Header.GeneralPurposeBitFlag.FormatString()}");
+        //     Console.WriteLine($"Compression Method: {localFileEntry.Header.CompressionMethod}");
+        //     Console.WriteLine($"Compressed Size: {localFileEntry.Header.CompressedSize}");
+        //     Console.WriteLine($"Uncompressed Size: {localFileEntry.Header.UncompressedSize}");
+        //     
+        //     Console.WriteLine();
+        //     Console.WriteLine($"Data: ");
+        //     Console.WriteLine($"{localFileEntry.Data.Take(157).ToArray().FormatStringAsBits()}");
+        // }
         
         Console.WriteLine();
         Console.WriteLine("Central File Headers");
@@ -41,9 +63,10 @@ public class Unzipper(ILogger<Unzipper> logger)
             var startingPosition 
             in FindSignatures(allBytes, CentralFileHeader.CentralFileHeaderSignature))
         {
-            Console.WriteLine($"Starting position: {startingPosition}");
+            // Console.WriteLine($"Starting position: {startingPosition}");
             var header = new CentralFileHeader(allBytes, startingPosition);
-            Console.WriteLine(header.FileName);
+            header.PrintHeader();
+            // Console.WriteLine(header.FileName);
         }
         
     }

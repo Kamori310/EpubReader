@@ -45,7 +45,7 @@ public struct CentralFileHeader
     public ushort VersionMadeBy { get; }
     public ushort VersionNeededToExtract { get; }
     public bool[] GeneralPurposeBitFlag { get; }
-    public ushort CompressionMethod { get; }
+    public CompressionMethod CompressionMethod { get; }
     public DateTime LastModFileDateTime => CalculateLastModifiedDateTime();
     public byte[] Crc32 { get; }
     public uint CompressedSize { get; }
@@ -77,7 +77,7 @@ public struct CentralFileHeader
         GeneralPurposeBitFlag = CalculateGeneralPurposeBitFlag(input, startingPosition);
         startingPosition += GeneralPurposeBitFlagLength;
 
-        CompressionMethod = BitConverter.ToUInt16(input, startingPosition);
+        CompressionMethod = (CompressionMethod)BitConverter.ToUInt16(input, startingPosition);
         startingPosition += CompressionMethodLength;
 
         _lastModFileTime = input.Subarray(startingPosition, LastModFileTimeLength);
@@ -150,6 +150,26 @@ public struct CentralFileHeader
             FileNameLength +
             ExtraFieldLength +
             FileCommentLength;
+    }
+
+    internal void PrintHeader()
+    {
+        string output = 
+            $"File name: {FileName}\n" +
+            $"Extra field: {ExtraField}\n" +
+            $"File comment: {FileComment}\n" +
+            $"Version made by: {VersionMadeBy}\n" +
+            $"Version needed to extract: {VersionNeededToExtract}\n" +
+            $"General purpose bit flag: {GeneralPurposeBitFlag.FormatString()}\n" +
+            $"Compression method: {CompressionMethod}\n" +
+            $"Last modified: {LastModFileDateTime}\n" +
+            $"Compressed size: {CompressedSize}\n" +
+            $"Uncompressed size: {UncompressedSize}\n" +
+            $"Disk number start: {DiskNumberStart}\n" +
+            $"Internal file attributes: \n{InternalFileAttributes.FormatStringAsBits()}\n" +
+            $"External file attributes: \n{ExternalFileAttributes.FormatStringAsBits()}\n" +
+            $"Relative offset of local header: {RelativeOffsetOfLocalHeader}\n\n";
+        Console.Write(output);
     }
 
     private static bool[] CalculateGeneralPurposeBitFlag(byte[] input, int startingPosition)

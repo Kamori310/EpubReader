@@ -15,36 +15,61 @@ public struct Zip64EndOfCentralDirectoryRecord
     public const int SizeOfTheCentralDirectoryLength = 8;
     public const int OffsetOfStartOfCentralDirectoryWrtTheStartingDiskNumberLength = 8;
 
-    public byte[] SizeOfZip64EndOfCentralDirectoryRecord { get; set; }
-    public byte[] VersionMadeBy { get; set; }
-    public byte[] VersionNeededToExtract { get; set; }
-    public byte[] NumberOfThisDisk { get; set; }
-    public byte[] NumberOfTheDiskWithTheStartOfTheCentralDirectory { get; set; }
-    public byte[] TotalNumberOfEntriesInTheCentralDirectoryOnThisDisk { get; set; }
-    public byte[] TotalNumberOfEntriesInTheCentralDirectory { get; set; }
-    public byte[] SizeOfTheCentralDirectory { get; set; }
-    public byte[] OffsetOfStartOfCentralDirectoryWrtTheStartingDiskNumber { get; set; }
+    public ulong SizeOfZip64EndOfCentralDirectoryRecord { get; }
+    public ushort VersionMadeBy { get; }
+    public ushort VersionNeededToExtract { get; }
+    public uint NumberOfThisDisk { get; }
+    public uint NumberOfTheDiskWithTheStartOfTheCentralDirectory { get; }
+    public ulong TotalNumberOfEntriesInTheCentralDirectoryOnThisDisk { get; }
+    public ulong TotalNumberOfEntriesInTheCentralDirectory { get; }
+    public ulong SizeOfTheCentralDirectory { get; }
+    public ulong OffsetOfStartOfCentralDirectoryWrtTheStartingDiskNumber { get; }
+    public byte[] Zip64ExtensibleDataSector { get; }
 
-    public Zip64EndOfCentralDirectoryRecord(
-        byte[] sizeOfZip64EndOfCentralDirectoryRecord, 
-        byte[] versionMadeBy,
-        byte[] versionNeededToExtract, 
-        byte[] numberOfThisDisk, 
-        byte[] numberOfTheDiskWithTheStartOfTheCentralDirectory,
-        byte[] totalNumberOfEntriesInTheCentralDirectoryOnThisDisk, 
-        byte[] totalNumberOfEntriesInTheCentralDirectory,
-        byte[] sizeOfTheCentralDirectory, 
-        byte[] offsetOfStartOfCentralDirectoryWrtTheStartingDiskNumber)
+    private const ulong SizeOfFixedFields = 
+        VersionMadeByLength + 
+        VersionNeededToExtractLength + 
+        NumberOfThisDiskLength + 
+        NumberOfTheDiskWithTheStartOfTheCentralDirectoryLength + 
+        TotalNumberOfEntriesInTheCentralDirectoryOnThisDiskLength + 
+        TotalNumberOfEntriesInTheCentralDirectoryLength + 
+        SizeOfTheCentralDirectoryLength + 
+        OffsetOfStartOfCentralDirectoryWrtTheStartingDiskNumberLength;
+
+
+    public Zip64EndOfCentralDirectoryRecord(byte[] input, int startingPosition)
     {
-        SizeOfZip64EndOfCentralDirectoryRecord = sizeOfZip64EndOfCentralDirectoryRecord;
-        VersionMadeBy = versionMadeBy;
-        VersionNeededToExtract = versionNeededToExtract;
-        NumberOfThisDisk = numberOfThisDisk;
-        NumberOfTheDiskWithTheStartOfTheCentralDirectory = numberOfTheDiskWithTheStartOfTheCentralDirectory;
-        TotalNumberOfEntriesInTheCentralDirectoryOnThisDisk = totalNumberOfEntriesInTheCentralDirectoryOnThisDisk;
-        TotalNumberOfEntriesInTheCentralDirectory = totalNumberOfEntriesInTheCentralDirectory;
-        SizeOfTheCentralDirectory = sizeOfTheCentralDirectory;
-        OffsetOfStartOfCentralDirectoryWrtTheStartingDiskNumber =
-            offsetOfStartOfCentralDirectoryWrtTheStartingDiskNumber;
+        startingPosition += Zip64EndOfCentralDirSignatureLength;
+        
+        SizeOfZip64EndOfCentralDirectoryRecord = BitConverter.ToUInt64(input, startingPosition);
+        startingPosition += SizeOfZip64EndOfCentralDirectoryRecordLength;
+        
+        VersionMadeBy = BitConverter.ToUInt16(input, startingPosition);
+        startingPosition += VersionMadeByLength;
+        
+        VersionNeededToExtract = BitConverter.ToUInt16(input, startingPosition);
+        startingPosition += VersionNeededToExtractLength;
+        
+        NumberOfThisDisk = BitConverter.ToUInt32(input, startingPosition);
+        startingPosition += NumberOfThisDiskLength;
+        
+        NumberOfTheDiskWithTheStartOfTheCentralDirectory = BitConverter.ToUInt32(input, startingPosition);
+        startingPosition += NumberOfTheDiskWithTheStartOfTheCentralDirectoryLength;
+        
+        TotalNumberOfEntriesInTheCentralDirectoryOnThisDisk = BitConverter.ToUInt64(input, startingPosition);
+        startingPosition += TotalNumberOfEntriesInTheCentralDirectoryOnThisDiskLength;
+        
+        TotalNumberOfEntriesInTheCentralDirectory = BitConverter.ToUInt64(input, startingPosition);
+        startingPosition += TotalNumberOfEntriesInTheCentralDirectoryLength;
+        
+        SizeOfTheCentralDirectory = BitConverter.ToUInt64(input, startingPosition);
+        startingPosition += SizeOfTheCentralDirectoryLength;
+        
+        OffsetOfStartOfCentralDirectoryWrtTheStartingDiskNumber = BitConverter.ToUInt64(input, startingPosition);
+        startingPosition += OffsetOfStartOfCentralDirectoryWrtTheStartingDiskNumberLength;
+
+        var sizeVariableData = SizeOfTheCentralDirectory + 12 - SizeOfFixedFields;
+        // TODO
+        // Zip64ExtensibleDataSector = input.Skip(startingPosition).Take(sizeVariableData);
     }
 }
